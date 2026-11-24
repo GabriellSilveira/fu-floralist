@@ -11,7 +11,7 @@
   display: block;
   top: 135px;
   left: 120px;
-  width: 460px;
+  width: 490px;
   z-index: 150;
   font-family: 'Nunito', var(--font-primary, sans-serif);
   filter: drop-shadow(0 0 14px rgba(74, 222, 128, 0.34));
@@ -25,23 +25,77 @@
   pointer-events: none;
 }
 
+/* Controles do Modal (_ e X) acima de todas as flores no canto superior direito */
+#fu-floralist-hud .fu-modal-controls {
+  position: absolute;
+  top: 12px;
+  right: 22px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  z-index: 45;
+  pointer-events: auto;
+}
+
+#fu-floralist-hud .fu-modal-btn {
+  width: 32px !important;
+  height: 32px !important;
+  min-width: 32px !important;
+  min-height: 32px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border-radius: 50% !important;
+  border: 2.5px solid #8cc2a7 !important;
+  background: linear-gradient(180deg, #ffffff 0%, #e6f6ee 100%) !important;
+  color: #4e8568 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer;
+  box-shadow: 0 3px 0 #bce0ce, 0 4px 8px rgba(67, 122, 94, 0.18) !important;
+  transition: transform 0.15s ease, background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+#fu-floralist-hud .fu-modal-btn:hover {
+  transform: translateY(-1.5px);
+  background: linear-gradient(180deg, #ffffff 0%, #d5f2e4 100%) !important;
+  border-color: #63a382 !important;
+}
+
+#fu-floralist-hud .fu-modal-btn.close-btn:hover {
+  border-color: #e88b4b !important;
+  background: linear-gradient(180deg, #fffdfb 0%, #fde8d7 100%) !important;
+  color: #d9722e !important;
+  box-shadow: 0 3px 0 #f3c3a2, 0 4px 8px rgba(217, 114, 46, 0.22) !important;
+}
+
+#fu-floralist-hud .fu-modal-btn svg {
+  width: 15px;
+  height: 15px;
+  stroke: currentColor;
+  stroke-width: 2.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  fill: none;
+}
+
 /* Corpo do Card Translúcido com Blur */
 #fu-floralist-hud .fu-card-body {
   position: relative;
   width: 100%;
   background: linear-gradient(
     180deg,
-    rgba(245, 251, 248, 0.92) 0%,
-    rgba(255, 255, 255, 0.90) 24%,
-    rgba(255, 255, 255, 0.90) 78%,
-    rgba(242, 250, 246, 0.93) 100%
+    rgba(245, 251, 248, 0.93) 0%,
+    rgba(255, 255, 255, 0.92) 24%,
+    rgba(255, 255, 255, 0.92) 78%,
+    rgba(242, 250, 246, 0.94) 100%
   );
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border: 4px solid #ffffff;
   border-radius: 44px;
   overflow: hidden;
-  padding: 102px 20px 58px 20px;
+  padding: 106px 22px 58px 22px;
   box-shadow:
     inset 0 0 0 2px #d5ede1,
     0 0 12px rgba(74, 222, 128, 0.55),
@@ -52,7 +106,7 @@
 
 /* Estado Minimizado: Recolhe para Barra Compacta com Status Ativo */
 #fu-floralist-hud.fu-floralist-wrapper.is-minimized .fu-card-body {
-  padding: 96px 20px 18px 20px;
+  padding: 98px 22px 20px 22px;
 }
 
 #fu-floralist-hud.fu-floralist-wrapper.is-minimized .fu-floral-content,
@@ -64,14 +118,14 @@
   display: none;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
+  gap: 10px;
   margin-top: 8px;
-  padding: 7px 14px;
+  padding: 8px 16px;
   border-radius: 999px;
-  background: rgba(230, 246, 238, 0.92);
+  background: rgba(230, 246, 238, 0.95);
   border: 1.5px solid #9fd1b8;
   color: #35634b;
-  font-size: 12.5px;
+  font-size: 14px;
   font-weight: 800;
 }
 
@@ -80,8 +134,8 @@
 }
 
 #fu-floralist-hud .fu-mini-dot {
-  width: 9px;
-  height: 9px;
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
   background: #94a3b8;
   flex-shrink: 0;
@@ -102,61 +156,10 @@
 #fu-floralist-hud .fu-mini-mp {
   background: #ffffff;
   color: #4e8568;
-  padding: 2px 9px;
+  padding: 2px 10px;
   border-radius: 999px;
   border: 1px solid #bce0ce;
-  font-size: 11.5px;
-}
-
-/* Controles do Modal (_ e X) */
-#fu-floralist-hud .fu-modal-controls {
-  position: absolute;
-  top: 76px;
-  right: 22px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  z-index: 25;
-}
-
-#fu-floralist-hud .fu-modal-btn {
-  width: 30px;
-  height: 30px;
-  min-width: 30px;
-  padding: 0;
-  border-radius: 50%;
-  border: 2.5px solid #8cc2a7;
-  background: linear-gradient(180deg, #ffffff 0%, #e6f6ee 100%);
-  color: #4e8568;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  box-shadow: 0 3px 0 #bce0ce, 0 4px 8px rgba(67, 122, 94, 0.14);
-  transition: transform 0.15s ease, background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
-}
-
-#fu-floralist-hud .fu-modal-btn:hover {
-  transform: translateY(-1.5px);
-  background: linear-gradient(180deg, #ffffff 0%, #d5f2e4 100%);
-  border-color: #63a382;
-}
-
-#fu-floralist-hud .fu-modal-btn.close-btn:hover {
-  border-color: #e88b4b;
-  background: linear-gradient(180deg, #fffdfb 0%, #fde8d7 100%);
-  color: #d9722e;
-  box-shadow: 0 3px 0 #f3c3a2, 0 4px 8px rgba(217, 114, 46, 0.18);
-}
-
-#fu-floralist-hud .fu-modal-btn svg {
-  width: 14px;
-  height: 14px;
-  stroke: currentColor;
-  stroke-width: 2.8;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  fill: none;
+  font-size: 13px;
 }
 
 /* Onda mint no topo e área de arraste */
@@ -196,7 +199,7 @@
   top: -118px;
   left: 50%;
   transform: translateX(-50%);
-  width: 560px;
+  width: 585px;
   height: 310px;
   z-index: 15;
   pointer-events: none;
@@ -259,30 +262,30 @@
   z-index: 10;
   display: flex;
   flex-direction: column;
-  gap: 11px;
+  gap: 12px;
 }
 
 #fu-floralist-hud .fu-floral-status-bar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
-  background: rgba(240, 250, 245, 0.9);
+  gap: 10px;
+  background: rgba(240, 250, 245, 0.92);
   border: 1.5px solid #cbe7d9;
   border-radius: 18px;
-  padding: 6px 10px;
+  padding: 7px 12px;
 }
 
 #fu-floralist-hud .fu-floral-actor-pill {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 9px;
   min-width: 0;
 }
 
 #fu-floralist-hud .fu-floral-actor-pill img {
-  width: 34px;
-  height: 34px;
+  width: 38px;
+  height: 38px;
   border-radius: 50%;
   border: 2px solid #7ab897;
   object-fit: cover;
@@ -291,26 +294,26 @@
 
 #fu-floralist-hud .fu-floral-actor-name {
   display: block;
-  font-size: 13.5px;
+  font-size: 15.5px;
   font-weight: 900;
   color: #365e49;
-  line-height: 1.1;
+  line-height: 1.15;
 }
 
 #fu-floralist-hud .fu-floral-select {
-  height: 24px;
-  font-size: 12.5px;
+  height: 26px;
+  font-size: 14px;
   font-weight: 800;
   color: #365e49;
   background: #ffffff;
   border: 1px solid #9fd1b8;
   border-radius: 8px;
-  padding: 0 6px;
+  padding: 0 8px;
 }
 
 #fu-floralist-hud .fu-floral-level-badge {
   display: block;
-  font-size: 11px;
+  font-size: 12.5px;
   font-weight: 700;
   color: #5a8c72;
 }
@@ -319,24 +322,24 @@
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: 2px;
+  gap: 3px;
 }
 
 #fu-floralist-hud .fu-mp-counter {
-  font-size: 12.5px;
+  font-size: 14px;
   font-weight: 800;
   color: #2c6e8a;
   background: #e8f7fc;
   border: 1px solid #bae3f2;
   border-radius: 999px;
-  padding: 1px 9px;
+  padding: 2px 11px;
 }
 
 #fu-floralist-hud .fu-mp-checkbox {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  font-size: 11px;
+  gap: 5px;
+  font-size: 12.5px;
   font-weight: 700;
   color: #4b6e5c;
   cursor: pointer;
@@ -344,26 +347,28 @@
 
 #fu-floralist-hud .fu-mp-checkbox input {
   margin: 0;
+  width: 14px;
+  height: 14px;
   accent-color: #4a8566;
 }
 
 #fu-floralist-hud .fu-spectator-banner {
   text-align: center;
-  font-size: 11.5px;
+  font-size: 13px;
   font-weight: 800;
   color: #9a5b25;
   background: #fff4e5;
   border: 1px solid #f4c898;
   border-radius: 10px;
-  padding: 4px 8px;
+  padding: 5px 10px;
 }
 
 /* Seção do Relógio de Germinação */
 #fu-floralist-hud .fu-floral-clock-section {
-  background: rgba(255, 252, 247, 0.92);
+  background: rgba(255, 252, 247, 0.94);
   border: 1.5px solid #edd9c4;
   border-radius: 22px;
-  padding: 9px 11px;
+  padding: 10px 12px;
 }
 
 #fu-floralist-hud .fu-clock-header-row,
@@ -371,12 +376,12 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 6px;
-  margin-bottom: 6px;
+  gap: 8px;
+  margin-bottom: 8px;
 }
 
 #fu-floralist-hud .fu-section-title {
-  font-size: 12.5px;
+  font-size: 14px;
   font-weight: 900;
   text-transform: uppercase;
   letter-spacing: 0.4px;
@@ -392,29 +397,33 @@
 }
 
 #fu-floralist-hud .fu-variant-btn {
-  border: none;
-  background: transparent;
-  color: #7c5636;
-  font-family: 'Nunito', sans-serif;
-  font-size: 10.5px;
-  font-weight: 800;
-  padding: 2px 8px;
-  border-radius: 999px;
+  height: auto !important;
+  min-height: 0 !important;
+  border: none !important;
+  background: transparent !important;
+  color: #7c5636 !important;
+  font-family: 'Nunito', sans-serif !important;
+  font-size: 12px !important;
+  font-weight: 800 !important;
+  padding: 3px 10px !important;
+  margin: 0 !important;
+  border-radius: 999px !important;
   cursor: pointer;
-  line-height: 1.3;
+  line-height: 1.3 !important;
+  box-shadow: none !important;
 }
 
 #fu-floralist-hud .fu-variant-btn.is-active {
-  background: #ff852e;
-  color: #ffffff;
-  box-shadow: 0 1px 3px rgba(184, 62, 4, 0.35);
+  background: #ff852e !important;
+  color: #ffffff !important;
+  box-shadow: 0 1px 3px rgba(184, 62, 4, 0.35) !important;
 }
 
 #fu-floralist-hud .fu-clock-stage-grid {
   display: grid;
-  grid-template-columns: 168px 1fr;
+  grid-template-columns: 174px 1fr;
   align-items: center;
-  gap: 10px;
+  gap: 11px;
 }
 
 #fu-floralist-hud .fu-clock-svg-container {
@@ -424,7 +433,7 @@
 }
 
 #fu-floralist-hud .fu-wheel-svg {
-  width: 166px;
+  width: 172px;
   height: auto;
   overflow: visible;
   filter: drop-shadow(0 5px 10px rgba(74, 42, 18, 0.14));
@@ -445,21 +454,22 @@
   border: 1.5px solid #d5ede1;
   border-left: 4px solid var(--seed-accent, #4ade80);
   border-radius: 14px;
-  padding: 8px;
+  padding: 9px;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 7px;
+  cursor: context-menu;
 }
 
 #fu-floralist-hud .fu-planted-top {
   display: flex;
   align-items: center;
-  gap: 7px;
+  gap: 8px;
 }
 
 #fu-floralist-hud .fu-planted-top img {
-  width: 30px;
-  height: 30px;
+  width: 34px;
+  height: 34px;
   border-radius: 8px;
   border: 1px solid #cbd5e1;
   object-fit: cover;
@@ -473,14 +483,14 @@
 }
 
 #fu-floralist-hud .fu-planted-tag {
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 800;
   color: #4e8568;
   text-transform: uppercase;
 }
 
 #fu-floralist-hud .fu-planted-meta strong {
-  font-size: 13px;
+  font-size: 14.5px;
   color: #1f2937;
   white-space: nowrap;
   overflow: hidden;
@@ -489,78 +499,81 @@
 
 #fu-floralist-hud .fu-planted-effect-box {
   background: #f6fbf8;
-  border-radius: 9px;
-  padding: 6px 7px;
-  font-size: 11px;
-  line-height: 1.32;
+  border-radius: 10px;
+  padding: 7px 8px;
+  font-size: 12.5px;
+  line-height: 1.35;
   color: #334155;
 }
 
 #fu-floralist-hud .fu-planted-effect-box p {
-  margin: 2px 0 0 0;
+  margin: 3px 0 0 0;
 }
 
 #fu-floralist-hud .fu-stage-badge {
   display: inline-block;
-  font-size: 10px;
+  font-size: 11.5px;
   font-weight: 900;
   background: #dcfce7;
   color: #166534;
-  padding: 1px 6px;
+  padding: 1px 7px;
   border-radius: 6px;
 }
 
 #fu-floralist-hud .fu-planted-actions {
   display: flex;
-  gap: 5px;
+  gap: 6px;
 }
 
 #fu-floralist-hud .fu-empty-garden-box {
-  background: rgba(245, 251, 248, 0.85);
+  background: rgba(245, 251, 248, 0.88);
   border: 1.5px dashed #a7d7bf;
   border-radius: 14px;
-  padding: 12px 10px;
+  padding: 13px 11px;
   text-align: center;
   color: #4b7560;
 }
 
 #fu-floralist-hud .fu-empty-garden-box i {
-  font-size: 20px;
+  font-size: 22px;
   color: #5e9c7b;
-  margin-bottom: 3px;
+  margin-bottom: 4px;
 }
 
 #fu-floralist-hud .fu-empty-garden-box strong {
   display: block;
-  font-size: 12.5px;
+  font-size: 14px;
 }
 
 #fu-floralist-hud .fu-empty-garden-box p {
-  margin: 3px 0 0 0;
-  font-size: 11px;
-  line-height: 1.3;
+  margin: 4px 0 0 0;
+  font-size: 12.5px;
+  line-height: 1.35;
 }
 
 /* Botões de Ação */
 #fu-floralist-hud .fu-clock-controls-row {
   display: flex;
-  gap: 6px;
-  margin-top: 8px;
+  gap: 7px;
+  margin-top: 9px;
 }
 
 #fu-floralist-hud .fu-btn {
-  font-family: 'Nunito', sans-serif;
-  font-weight: 800;
-  font-size: 11.5px;
-  border-radius: 11px;
-  padding: 5px 10px;
+  height: auto !important;
+  min-height: 32px !important;
+  font-family: 'Nunito', sans-serif !important;
+  font-weight: 800 !important;
+  font-size: 13px !important;
+  border-radius: 11px !important;
+  padding: 6px 12px !important;
+  margin: 0 !important;
   cursor: pointer;
-  border: 1.5px solid transparent;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 5px;
-  line-height: 1.2;
+  border: 1.5px solid transparent !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px;
+  line-height: 1.25 !important;
   transition: transform 0.12s ease, filter 0.15s ease;
 }
 
@@ -576,116 +589,133 @@
 
 #fu-floralist-hud .fu-btn-primary {
   flex: 1;
-  background: linear-gradient(180deg, #5eb386 0%, #448f68 100%);
-  color: #ffffff;
-  border-color: #367855;
-  box-shadow: 0 2px 0 #2d6648;
+  background: linear-gradient(180deg, #5eb386 0%, #448f68 100%) !important;
+  color: #ffffff !important;
+  border-color: #367855 !important;
+  box-shadow: 0 2px 0 #2d6648 !important;
 }
 
 #fu-floralist-hud .fu-btn-ghost {
-  background: #fff7ed;
-  color: #9a531c;
-  border-color: #f2c9a0;
+  background: #fff7ed !important;
+  color: #9a531c !important;
+  border-color: #f2c9a0 !important;
+  box-shadow: none !important;
 }
 
 #fu-floralist-hud .fu-btn-soft {
   flex: 1;
-  background: #e8f7f0;
-  color: #2f6f4e;
-  border-color: #a9dbc2;
-  padding: 4px 6px;
-  font-size: 11px;
+  min-height: 28px !important;
+  background: #e8f7f0 !important;
+  color: #2f6f4e !important;
+  border-color: #a9dbc2 !important;
+  padding: 4px 8px !important;
+  font-size: 12px !important;
+  box-shadow: none !important;
 }
 
 #fu-floralist-hud .fu-btn-danger {
-  background: #fef2f2;
-  color: #b91c1c;
-  border-color: #fecaca;
-  padding: 4px 7px;
-  font-size: 11px;
+  min-height: 28px !important;
+  background: #fef2f2 !important;
+  color: #b91c1c !important;
+  border-color: #fecaca !important;
+  padding: 4px 8px !important;
+  font-size: 12px !important;
+  box-shadow: none !important;
 }
 
-/* Grid de Magissementes */
+/* Grid de Magissementes (3 em cima, 2 centralizadas embaixo, sem corte) */
 #fu-floralist-hud .fu-floral-seeds-section {
-  background: rgba(255, 255, 255, 0.88);
+  background: rgba(255, 255, 255, 0.90);
   border: 1.5px solid #d5ede1;
   border-radius: 20px;
-  padding: 9px 11px;
+  padding: 10px 12px;
 }
 
 #fu-floralist-hud .fu-action-hint {
-  font-size: 10.5px;
+  font-size: 12px;
   font-weight: 800;
   color: #5e9c7b;
 }
 
 #fu-floralist-hud .fu-seeds-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 6px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
 }
 
 #fu-floralist-hud .fu-seed-btn {
+  flex: 0 0 calc(33.333% - 6px);
+  max-width: calc(33.333% - 6px);
+  height: auto !important;
+  min-height: 86px !important;
   position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 3px;
-  padding: 6px 4px;
-  border-radius: 12px;
-  border: 1.5px solid #d5ede1;
-  background: linear-gradient(180deg, #ffffff 0%, #f4fbf7 100%);
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 4px;
+  padding: 8px 6px !important;
+  margin: 0 !important;
+  border-radius: 14px !important;
+  border: 1.5px solid #d5ede1 !important;
+  background: linear-gradient(180deg, #ffffff 0%, #f4fbf7 100%) !important;
   cursor: pointer;
-  font-family: 'Nunito', sans-serif;
+  font-family: 'Nunito', sans-serif !important;
+  line-height: 1.2 !important;
+  box-shadow: 0 2px 5px rgba(45, 92, 68, 0.06) !important;
   transition: transform 0.14s ease, border-color 0.16s ease, box-shadow 0.16s ease;
 }
 
 #fu-floralist-hud .fu-seed-btn:not(:disabled):hover {
   transform: translateY(-1.5px);
-  border-color: #4ade80;
-  box-shadow: 0 3px 8px rgba(74, 222, 128, 0.25);
+  border-color: #4ade80 !important;
+  box-shadow: 0 4px 10px rgba(74, 222, 128, 0.25) !important;
 }
 
 #fu-floralist-hud .fu-seed-btn:disabled {
-  opacity: 0.55;
-  cursor: not-allowed;
+  opacity: 0.62;
+  cursor: context-menu;
 }
 
 #fu-floralist-hud .fu-seed-btn.is-planted {
-  opacity: 1;
-  border-color: #22c55e;
-  background: linear-gradient(180deg, #ecfdf5 0%, #d1fae5 100%);
-  box-shadow: 0 0 0 1.5px #22c55e;
+  opacity: 1 !important;
+  border-color: #22c55e !important;
+  background: linear-gradient(180deg, #ecfdf5 0%, #d1fae5 100%) !important;
+  box-shadow: 0 0 0 1.5px #22c55e !important;
 }
 
 #fu-floralist-hud .fu-seed-btn.is-graftable {
-  border-color: #f59e0b;
-  background: linear-gradient(180deg, #fffbeb 0%, #fef3c7 100%);
+  border-color: #f59e0b !important;
+  background: linear-gradient(180deg, #fffbeb 0%, #fef3c7 100%) !important;
 }
 
 #fu-floralist-hud .fu-seed-btn img {
-  width: 28px;
-  height: 28px;
-  border-radius: 7px;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
   object-fit: cover;
+  flex-shrink: 0;
 }
 
 #fu-floralist-hud .fu-seed-name {
-  font-size: 10.5px;
+  font-size: 12px;
   font-weight: 800;
   color: #1f2937;
   text-align: center;
   line-height: 1.15;
+  white-space: normal;
 }
 
 #fu-floralist-hud .fu-seed-badge {
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 900;
   text-transform: uppercase;
-  padding: 1px 5px;
+  padding: 2px 7px;
   border-radius: 999px;
   background: #e2e8f0;
   color: #334155;
+  line-height: 1.1;
 }
 
 #fu-floralist-hud .fu-seed-btn.is-planted .fu-seed-badge {
@@ -702,35 +732,226 @@
 #fu-floralist-hud .fu-floral-skills-bar {
   display: flex;
   flex-wrap: wrap;
-  gap: 5px;
+  gap: 6px;
   justify-content: center;
 }
 
 #fu-floralist-hud .fu-skill-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 3px 8px;
-  border-radius: 999px;
-  border: 1.5px solid #9fd1b8;
-  background: rgba(255, 255, 255, 0.92);
-  color: #335c47;
-  font-family: 'Nunito', sans-serif;
-  font-size: 10.5px;
-  font-weight: 800;
+  height: auto !important;
+  min-height: 28px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 5px;
+  padding: 4px 10px !important;
+  margin: 0 !important;
+  border-radius: 999px !important;
+  border: 1.5px solid #9fd1b8 !important;
+  background: rgba(255, 255, 255, 0.94) !important;
+  color: #335c47 !important;
+  font-family: 'Nunito', sans-serif !important;
+  font-size: 12px !important;
+  font-weight: 800 !important;
   cursor: pointer;
-  line-height: 1.2;
+  line-height: 1.2 !important;
+  box-shadow: none !important;
 }
 
 #fu-floralist-hud .fu-skill-pill:hover {
-  background: #e6f6ee;
-  border-color: #5e9c7b;
+  background: #e6f6ee !important;
+  border-color: #5e9c7b !important;
 }
 
 #fu-floralist-hud .fu-skill-pill img {
-  width: 15px;
-  height: 15px;
+  width: 17px;
+  height: 17px;
   border-radius: 50%;
+}
+
+/* Popover Flutuante de Hint (Botão Direito) */
+#fu-floralist-hint-popover.fu-floralist-hint {
+  position: fixed;
+  z-index: 260;
+  width: 340px;
+  max-width: 92vw;
+  background: linear-gradient(180deg, #f7fcf9 0%, #ffffff 100%);
+  border: 2.5px solid #63a382;
+  border-radius: 18px;
+  box-shadow:
+    0 0 16px rgba(74, 222, 128, 0.35),
+    0 12px 28px rgba(30, 58, 44, 0.28);
+  font-family: 'Nunito', var(--font-primary, sans-serif);
+  color: #1f2937;
+  overflow: hidden;
+  animation: fuHintFadeIn 0.14s ease-out;
+}
+
+@keyframes fuHintFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+#fu-floralist-hint-popover .fu-hint-header {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 9px 12px;
+  background: linear-gradient(180deg, #dff3e8 0%, #ccead9 100%);
+  border-bottom: 1.5px solid #a7d7bf;
+}
+
+#fu-floralist-hint-popover .fu-hint-header img {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  border: 1.5px solid #5e9c7b;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+#fu-floralist-hint-popover .fu-hint-titles {
+  flex: 1;
+  min-width: 0;
+}
+
+#fu-floralist-hint-popover .fu-hint-titles strong {
+  display: block;
+  font-size: 14.5px;
+  font-weight: 900;
+  color: #264d39;
+  line-height: 1.15;
+}
+
+#fu-floralist-hint-popover .fu-hint-titles span {
+  display: block;
+  font-size: 11.5px;
+  font-weight: 800;
+  color: #4b7d63;
+}
+
+#fu-floralist-hint-popover .fu-hint-close {
+  width: 24px !important;
+  height: 24px !important;
+  min-width: 24px !important;
+  min-height: 24px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border-radius: 50% !important;
+  border: 1.5px solid #7ab897 !important;
+  background: #ffffff !important;
+  color: #4e8568 !important;
+  font-size: 16px !important;
+  font-weight: 900 !important;
+  line-height: 1 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer;
+}
+
+#fu-floralist-hint-popover .fu-hint-body {
+  padding: 10px 12px;
+  font-size: 12.5px;
+  line-height: 1.4;
+}
+
+#fu-floralist-hint-popover .fu-hint-body p {
+  margin: 0 0 6px 0;
+}
+
+#fu-floralist-hint-popover .fu-hint-body ul {
+  margin: 4px 0 6px 16px;
+  padding: 0;
+}
+
+#fu-floralist-hint-popover .fu-hint-body li {
+  margin-bottom: 4px;
+}
+
+#fu-floralist-hint-popover .fu-hint-stages-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+#fu-floralist-hint-popover .fu-hint-stage-row {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  background: #f5fbf8;
+  border: 1px solid #d5ede1;
+  border-radius: 10px;
+  padding: 6px 8px;
+}
+
+#fu-floralist-hint-popover .fu-hint-stage-pill {
+  align-self: flex-start;
+  font-size: 11px;
+  font-weight: 900;
+  background: #dcfce7;
+  color: #166534;
+  padding: 1px 7px;
+  border-radius: 6px;
+}
+
+#fu-floralist-hint-popover .fu-hint-footnote {
+  margin-top: 7px !important;
+  font-size: 11.5px;
+  color: #64748b;
+  font-style: italic;
+}
+
+#fu-floralist-hint-popover .fu-hint-extra-box {
+  margin-top: 6px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  color: #78350f;
+  font-size: 12px;
+}
+
+#fu-floralist-hint-popover .fu-hint-cycle-bar {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px dashed #cbd5e1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 800;
+  color: #475569;
+}
+
+#fu-floralist-hint-popover .fu-hint-cycle-btns {
+  display: inline-flex;
+  gap: 4px;
+}
+
+#fu-floralist-hint-popover .fu-hint-cycle-btn {
+  height: auto !important;
+  min-height: 0 !important;
+  padding: 3px 8px !important;
+  margin: 0 !important;
+  font-size: 11px !important;
+  font-weight: 800 !important;
+  border-radius: 8px !important;
+  border: 1px solid #cbd5e1 !important;
+  background: #f8fafc !important;
+  color: #475569 !important;
+  cursor: pointer;
+}
+
+#fu-floralist-hint-popover .fu-hint-cycle-btn.is-active {
+  background: #ff852e !important;
+  border-color: #d9530b !important;
+  color: #ffffff !important;
 }
 
 /* Botões Nativos Inseridos nas Mensagens de Chat */
@@ -743,7 +964,7 @@
   background: linear-gradient(180deg, #f3faf6 0%, #dff2e7 100%);
   color: #1f4731;
   font-weight: 700;
-  font-size: 0.88em;
+  font-size: 0.9em;
   cursor: pointer;
   transition: filter 0.15s ease;
 }
