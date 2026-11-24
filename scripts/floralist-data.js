@@ -6,12 +6,12 @@ export const DEFAULT_GARDEN_STATE = {
   plantedFuid: null,
   plantedItemId: null,
   clockCurrent: 0,
-  clockMax: 4,
+  clockMax: 3,
   deductMp: true
 };
 
 /**
- * Catálogo das Magissementes em PT-BR com fórmulas dinâmicas e ciclo de sessões.
+ * Catálogo das Magissementes em PT-BR com fórmulas dinâmicas e ciclo de 3 sessões.
  */
 export const MAGISEED_CATALOG = {
   "golden-ginkgo": {
@@ -20,7 +20,7 @@ export const MAGISEED_CATALOG = {
     defaultImg: "systems/projectfu/styles/static/compendium/classes/floralist/magiseeds/golden-ginkgo.png",
     accent: "#eab308",
     timing: "Fim do Turno",
-    clockSections: 4,
+    clockSections: 3,
     stages: [
       {
         min: 1,
@@ -57,7 +57,7 @@ export const MAGISEED_CATALOG = {
     defaultImg: "systems/projectfu/styles/static/compendium/classes/floralist/magiseeds/remedy-lily.png",
     accent: "#10b981",
     timing: "Fim do Turno",
-    clockSections: 4,
+    clockSections: 3,
     stages: [
       {
         min: 1,
@@ -94,7 +94,7 @@ export const MAGISEED_CATALOG = {
     defaultImg: "systems/projectfu/styles/static/compendium/classes/floralist/magiseeds/serrated-rose.png",
     accent: "#e11d48",
     timing: "Fim do Turno",
-    clockSections: 4,
+    clockSections: 3,
     stages: [
       {
         min: 1,
@@ -148,7 +148,7 @@ export const MAGISEED_CATALOG = {
     defaultImg: "systems/projectfu/styles/static/compendium/classes/floralist/magiseeds/star-peony.png",
     accent: "#f59e0b",
     timing: "Fim do Turno",
-    clockSections: 4,
+    clockSections: 3,
     stages: [
       {
         min: 1,
@@ -202,7 +202,7 @@ export const MAGISEED_CATALOG = {
     defaultImg: "systems/projectfu/styles/static/compendium/classes/floralist/magiseeds/wardwattle.png",
     accent: "#16a34a",
     timing: "Passivo",
-    clockSections: 4,
+    clockSections: 3,
     stages: [
       {
         min: 0,
@@ -327,12 +327,7 @@ export function extractFloralistSheetData(actor) {
 
     // Fallback dinâmico para novas magissementes adicionadas na ficha
     const rawEffects = item.system?.data?.effects || [];
-    const maxStageEnd = rawEffects.reduce((acc, eff) => Math.max(acc, Number(eff.end ?? 0)), 0);
-    const inferredSections = [3, 4].includes(customSections)
-      ? customSections
-      : maxStageEnd === 2
-        ? 3
-        : 4;
+    const inferredSections = [3, 4].includes(customSections) ? customSections : 3;
 
     return {
       fuid,
@@ -422,7 +417,6 @@ export function buildHintDetails(sheetData, { type, id }) {
 
     const stagesListHtml = seed.stages
       .map((st) => {
-        // Substitui valores calculados legíveis no resumo do hint
         let desc = st.summary;
         if (seed.fuid === "golden-ginkgo" && st.min === 2) {
           const total = 5 + chloromancySL + levelBonusResource;
@@ -463,7 +457,7 @@ export function buildHintDetails(sheetData, { type, id }) {
         <div class="fu-hint-stages-list">
           ${stagesListHtml}
         </div>
-        <p class="fu-hint-footnote">Ao preencher a última seção (${seed.clockSections}/${seed.clockSections}), a magissemente é removida e o relógio zera.</p>
+        <p class="fu-hint-footnote">Ao preencher a última seção (${seed.clockSections}/${seed.clockSections}), o efeito final ativa, a magissemente é removida e o relógio zera.</p>
       `
     };
   }
@@ -559,7 +553,7 @@ export function buildProjectFuChatCard({
           </div>
         </details>
       </div>
-      ${footerButtonsHtml ? `<div class="fu-floralist-chat-actions" style="margin-top: 8px; display: flex; flex-direction: column; gap: 4px;">${footerButtonsHtml}</div>` : ""}
+      ${footerButtonsHtml ? `<div class="fu-floralist-chat-actions" style="margin-top: 8px; display: flex; flex-direction: column; gap: 5px;">${footerButtonsHtml}</div>` : ""}
     </div>
   `;
 }
