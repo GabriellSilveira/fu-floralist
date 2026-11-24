@@ -73,7 +73,8 @@ export class FloralistGardenHUD {
     const flag = actor?.getFlag(MODULE_ID, "gardenState") || {};
     return {
       ...DEFAULT_GARDEN_STATE,
-      ...flag
+      ...flag,
+      clockMax: [3, 4].includes(Number(flag.clockMax)) ? Number(flag.clockMax) : 3
     };
   }
 
@@ -176,8 +177,8 @@ export class FloralistGardenHUD {
           <div class="fu-hint-cycle-bar">
             <span>Relógio desta flor:</span>
             <div class="fu-hint-cycle-btns">
-              <button type="button" class="fu-hint-cycle-btn ${details.clockSections === 4 ? "is-active" : ""}" data-hint-set-sections="4">4 Sessões</button>
               <button type="button" class="fu-hint-cycle-btn ${details.clockSections === 3 ? "is-active" : ""}" data-hint-set-sections="3">3 Sessões</button>
+              <button type="button" class="fu-hint-cycle-btn ${details.clockSections === 4 ? "is-active" : ""}" data-hint-set-sections="4">4 Sessões</button>
             </div>
           </div>
         `
@@ -204,7 +205,6 @@ export class FloralistGardenHUD {
     document.body.appendChild(pop);
     this.hintElement = pop;
 
-    // Posiciona próximo ao cursor sem sair da tela
     const rect = pop.getBoundingClientRect();
     const maxLeft = Math.max(12, window.innerWidth - rect.width - 14);
     const maxTop = Math.max(12, window.innerHeight - rect.height - 14);
@@ -220,11 +220,15 @@ export class FloralistGardenHUD {
       btn.addEventListener("click", async () => {
         const secs = Number(btn.dataset.hintSetSections);
         await this.setSeedClockSections(sheetData, details.seedFuid, secs);
-        this.showHintPopover(posLeft - 12, posTop + 16, extractFloralistSheetData(sheetData.actor), targetSpec);
+        this.showHintPopover(
+          posLeft - 12,
+          posTop + 16,
+          extractFloralistSheetData(sheetData.actor),
+          targetSpec
+        );
       });
     });
 
-    // Fecha ao clicar fora do popover
     this._outsideClickHandler = (ev) => {
       if (this.hintElement && !this.hintElement.contains(ev.target)) {
         this.closeHint();
@@ -255,6 +259,163 @@ export class FloralistGardenHUD {
           : '<line x1="3" y1="11.5" x2="13" y2="11.5" />';
       }
     }
+  }
+
+  /**
+   * Animação em meia-lua: uma carta ilustrada voa em arco curvo da semente clicada até o painel do jardim.
+   */
+  _animateSeedCrescentFlight(seed, startRect) {
+    if (!startRect || !this.element) return;
+    const targetPanel = this.element.querySelector(".fu-clock-info-panel");
+    if (!targetPanel) return;
+
+    const endRect = targetPanel.getBoundingClientRect();
+    const startX = startRect.left + startRect.width / 2;
+    const startY = startRect.top + startRect.height / 2;
+    const endX = endRect.left + endRect.width / 2;
+    const endY = endRect.top + endRect.height / 2;
+
+    // Ponto de controle deslocado para a esquerda formando o arco de meia-lua
+    const ctrlX = Math.min(startX, endX) - 135;
+    const ctrlY = (startY + endY) * 0.52;
+
+    const flyer = document.createElement("div");
+    flyer.className = "fu-flying-seed-card";
+    flyer.style.setProperty("--seed-accent", seed.accent || "#4ade80");
+    flyer.innerHTML = `
+      <img src="${seed.img}" alt="${seed.name}" />
+      <span>${seed.name}</span>
+    `;
+    document.body.appendChild(flyer);
+
+    const cardW = 112;
+    const cardH = 88;
+    const steps = 26;
+    const keyframes = [];
+
+    for (let i = 0; i <= steps; i++) {
+      const t = i / steps;
+      const inv = 1 - t;
+      // Curva de Bézier quadrática B(t) = (1-t)² P0 + 2(1-t)t P1 + t² P2
+      const x = inv * inv * startX + 2 * inv * t * ctrlX + t * t * endX;
+      const y = inv * inv * startY + 2 * inv * t * ctrlY + t * t * endY;
+
+      const arcPeak = Math.sin(t * Math.PI);
+      const scale = 0.92 + arcPeak * 0.24;
+      const rotateDeg = -14 * arcPeak;
+      const opacity = t < 0.82 ? 1 : Math.max(0, 1 - (t - 0.82) / 0.18);
+
+      keyframes.push({
+        transform: `translate3d(${x - cardW / 2}px, ${y - cardH / 2}px, 0) scale(${scale}) rotate(${rotateDeg}deg)`,
+        opacity
+      });
+    }
+
+    const anim = flyer.animate(keyframes, {
+      duration: 640,
+      easing: "cubic-bezier(0.22, 1, 0.36, 1)",
+      fill: "forwards"
+    });
+
+    const landedCard = this.element.querySelector(".fu-planted-card");
+    if (landedCard) {
+      landedCard.classList.add("is-landing-flash");
+      setTimeout(() => landedCard.classList.remove("is-landing-flash"), 760);
+    }
+
+    anim.onfinish = () => flyer.remove();
+  }
+
+  /**
+   * Animação de plantas crescendo e florescendo sobre o relógio ao concluir a 3ª sessão.
+   */
+  _triggerBloomGrowthAnimation() {
+    if (!this.element) return;
+    const container = this.element.querySelector(".fu-clock-svg-container");
+    if (!container) return;
+
+    container.querySelector(".fu-bloom-celebration")?.remove();
+
+    const overlay = document.createElement("div");
+    overlay.className = "fu-bloom-celebration";
+    overlay.innerHTML = `
+      <svg viewBox="0 0 220 220" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <radialGradient id="fuBloomPink" cx="50%" cy="50%" r="55%">
+            <stop offset="0%" stop-color="#FFF0F6"/>
+            <stop offset="65%" stop-color="#F7B2CE"/>
+            <stop offset="100%" stop-color="#E677A5"/>
+          </radialGradient>
+          <radialGradient id="fuBloomGold" cx="50%" cy="50%" r="55%">
+            <stop offset="0%" stop-color="#FFFDE7"/>
+            <stop offset="65%" stop-color="#FDE047"/>
+            <stop offset="100%" stop-color="#F59E0B"/>
+          </radialGradient>
+          <radialGradient id="fuBloomMint" cx="50%" cy="50%" r="55%">
+            <stop offset="0%" stop-color="#FFFFFF"/>
+            <stop offset="70%" stop-color="#A7F3D0"/>
+            <stop offset="100%" stop-color="#34D399"/>
+          </radialGradient>
+        </defs>
+
+        <!-- Caule central e ramos laterais crescendo para cima -->
+        <path class="fu-grow-stem fu-stem-main" d="M110 198 C108 158, 114 118, 110 64" />
+        <path class="fu-grow-stem fu-stem-left" d="M110 156 C86 138, 66 116, 54 88" />
+        <path class="fu-grow-stem fu-stem-right" d="M110 144 C136 126, 154 104, 166 78" />
+
+        <!-- Folhas brotando ao longo dos caules -->
+        <g class="fu-grow-leaf fu-leaf-1">
+          <path d="M108 166 C88 164, 78 150, 92 142 C102 148, 108 156, 108 166 Z" fill="#22C55E"/>
+        </g>
+        <g class="fu-grow-leaf fu-leaf-2">
+          <path d="M112 132 C132 130, 142 116, 128 108 C118 114, 112 122, 112 132 Z" fill="#16A34A"/>
+        </g>
+        <g class="fu-grow-leaf fu-leaf-3">
+          <path d="M84 128 C66 132, 56 120, 66 110 C76 114, 82 120, 84 128 Z" fill="#4ADE80"/>
+        </g>
+        <g class="fu-grow-leaf fu-leaf-4">
+          <path d="M138 116 C156 120, 166 108, 156 98 C146 102, 140 108, 138 116 Z" fill="#4ADE80"/>
+        </g>
+
+        <!-- Flores desabrochando nas pontas -->
+        <g class="fu-bloom-flower fu-flower-center" transform="translate(110, 62)">
+          <circle cx="0" cy="-14" r="10" fill="url(#fuBloomPink)"/>
+          <circle cx="13" cy="-4" r="10" fill="url(#fuBloomPink)"/>
+          <circle cx="8" cy="11" r="10" fill="url(#fuBloomPink)"/>
+          <circle cx="-8" cy="11" r="10" fill="url(#fuBloomPink)"/>
+          <circle cx="-13" cy="-4" r="10" fill="url(#fuBloomPink)"/>
+          <circle cx="0" cy="0" r="6" fill="#FDE047"/>
+        </g>
+
+        <g class="fu-bloom-flower fu-flower-left" transform="translate(54, 86)">
+          <circle cx="0" cy="-11" r="8" fill="url(#fuBloomGold)"/>
+          <circle cx="10.5" cy="-3.4" r="8" fill="url(#fuBloomGold)"/>
+          <circle cx="6.5" cy="9" r="8" fill="url(#fuBloomGold)"/>
+          <circle cx="-6.5" cy="9" r="8" fill="url(#fuBloomGold)"/>
+          <circle cx="-10.5" cy="-3.4" r="8" fill="url(#fuBloomGold)"/>
+          <circle cx="0" cy="0" r="4.5" fill="#FFFBEB"/>
+        </g>
+
+        <g class="fu-bloom-flower fu-flower-right" transform="translate(166, 76)">
+          <circle cx="0" cy="-11" r="8" fill="url(#fuBloomMint)"/>
+          <circle cx="10.5" cy="-3.4" r="8" fill="url(#fuBloomMint)"/>
+          <circle cx="6.5" cy="9" r="8" fill="url(#fuBloomMint)"/>
+          <circle cx="-6.5" cy="9" r="8" fill="url(#fuBloomMint)"/>
+          <circle cx="-10.5" cy="-3.4" r="8" fill="url(#fuBloomMint)"/>
+          <circle cx="0" cy="0" r="4.5" fill="#FDE047"/>
+        </g>
+
+        <!-- Brilhos mágicos subindo -->
+        <circle class="fu-bloom-sparkle fu-sp-1" cx="76" cy="64" r="4" fill="#FEF08A"/>
+        <circle class="fu-bloom-sparkle fu-sp-2" cx="144" cy="54" r="4.5" fill="#86EFAC"/>
+        <circle class="fu-bloom-sparkle fu-sp-3" cx="110" cy="34" r="5" fill="#FDE047"/>
+        <circle class="fu-bloom-sparkle fu-sp-4" cx="42" cy="116" r="3.5" fill="#BBF7D0"/>
+        <circle class="fu-bloom-sparkle fu-sp-5" cx="178" cy="108" r="3.5" fill="#FEF08A"/>
+      </svg>
+    `;
+
+    container.appendChild(overlay);
+    setTimeout(() => overlay.remove(), 1900);
   }
 
   _applySavedPosition(wrapper) {
@@ -336,10 +497,11 @@ export class FloralistGardenHUD {
   /**
    * Renderiza o SVG interativo do Relógio de Germinação (3 ou 4 sessões).
    */
-  _buildClockSvgHtml(clockCurrent, clockMax, isEditable) {
+  _buildClockSvgHtml(clockCurrent, clockMax, isEditable, isAlmostMax) {
     const isThree = Number(clockMax) === 3;
     const uid = isThree ? "fu3" : "fu4";
     const clickClass = isEditable ? "is-clickable" : "";
+    const almostClass = isAlmostMax ? "is-almost-max" : "";
 
     const slicesHtml = isThree
       ? `
@@ -353,9 +515,9 @@ export class FloralistGardenHUD {
               d="M 215 235 L 118.01 291 A 112 112 0 0 1 215 123 Z"
               fill="${clockCurrent >= 3 ? "url(#filledSlice3)" : "#FCECE0"}" />
 
-        <line x1="215" y1="235" x2="215" y2="123" stroke="#D9B99B" stroke-width="2.5" stroke-linecap="round"/>
-        <line x1="215" y1="235" x2="311.99" y2="291" stroke="#D9B99B" stroke-width="2.5" stroke-linecap="round"/>
-        <line x1="215" y1="235" x2="118.01" y2="291" stroke="#D9B99B" stroke-width="2.5" stroke-linecap="round"/>
+        <line x1="215" y1="235" x2="215" y2="123" stroke="#D9B99B" stroke-width="2.5" stroke-linecap="round" pointer-events="none"/>
+        <line x1="215" y1="235" x2="311.99" y2="291" stroke="#D9B99B" stroke-width="2.5" stroke-linecap="round" pointer-events="none"/>
+        <line x1="215" y1="235" x2="118.01" y2="291" stroke="#D9B99B" stroke-width="2.5" stroke-linecap="round" pointer-events="none"/>
       `
       : `
         <path data-clock-slice="1" class="fu-clock-slice ${clockCurrent >= 1 ? "is-filled" : ""} ${clickClass}"
@@ -371,12 +533,12 @@ export class FloralistGardenHUD {
               d="M 215 235 L 103 235 A 112 112 0 0 1 215 123 Z"
               fill="${clockCurrent >= 4 ? "url(#filledSlice4)" : "#F5DEC8"}" />
 
-        <line x1="215" y1="123" x2="215" y2="347" stroke="#D9B99B" stroke-width="2.5" stroke-linecap="round"/>
-        <line x1="103" y1="235" x2="327" y2="235" stroke="#D9B99B" stroke-width="2.5" stroke-linecap="round"/>
+        <line x1="215" y1="123" x2="215" y2="347" stroke="#D9B99B" stroke-width="2.5" stroke-linecap="round" pointer-events="none"/>
+        <line x1="103" y1="235" x2="327" y2="235" stroke="#D9B99B" stroke-width="2.5" stroke-linecap="round" pointer-events="none"/>
       `;
 
     return `
-      <svg class="fu-wheel-svg" viewBox="25 78 380 315" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <svg class="fu-wheel-svg ${almostClass}" viewBox="25 78 380 315" fill="none" xmlns="http://www.w3.org/2000/svg">
         <defs>
           <filter id="inner_${uid}" x="-15%" y="-15%" width="130%" height="130%">
             <feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="#8C582B" flood-opacity="0.26"/>
@@ -409,7 +571,7 @@ export class FloralistGardenHUD {
         </defs>
 
         <!-- 1. FOLHAS PONTIAGUDAS DE FUNDO -->
-        <g>
+        <g pointer-events="none">
           <use href="#sharpLeaf_${uid}" transform="translate(96, 272) rotate(-155) scale(1.4)" fill="#5E8712"/>
           <use href="#sharpLeaf_${uid}" transform="translate(106, 304) rotate(-168) scale(1.6)" fill="#4D700D"/>
           <use href="#sharpLeaf_${uid}" transform="translate(154, 356) rotate(172) scale(1.5)" fill="#5E8712"/>
@@ -421,7 +583,7 @@ export class FloralistGardenHUD {
         </g>
 
         <!-- 2. COGUMELOS LATERAIS -->
-        <g transform="translate(65, 206) rotate(-20)" filter="url(#drop_${uid})">
+        <g transform="translate(65, 206) rotate(-20)" filter="url(#drop_${uid})" pointer-events="none">
           <path d="M-8 6 L-11 26 C-11 30 11 30 11 26 L8 6 Z" fill="#F2E4D5"/>
           <path d="M2 6 L4 28 C8 28 11 27 11 26 L8 6 Z" fill="#DFCBB8"/>
           <path d="M-24 8 C-24 -12 24 -12 24 8 C24 13 -24 13 -24 8 Z" fill="#D93829"/>
@@ -429,13 +591,13 @@ export class FloralistGardenHUD {
           <circle cx="3" cy="-3" r="5" fill="#FFF8EE"/>
           <circle cx="14" cy="3" r="3.2" fill="#FFF8EE"/>
         </g>
-        <g transform="translate(72, 246) rotate(-14)" filter="url(#drop_${uid})">
+        <g transform="translate(72, 246) rotate(-14)" filter="url(#drop_${uid})" pointer-events="none">
           <path d="M-5 4 L-7 17 C-7 20 7 20 7 17 L5 4 Z" fill="#F2E4D5"/>
           <path d="M-16 5 C-16 -8 16 -8 16 5 C16 9 -16 9 -16 5 Z" fill="#D93829"/>
           <circle cx="-7" cy="0" r="2.8" fill="#FFF8EE"/>
           <circle cx="5" cy="-1" r="3.2" fill="#FFF8EE"/>
         </g>
-        <g transform="translate(350, 188) rotate(22)" filter="url(#drop_${uid})">
+        <g transform="translate(350, 188) rotate(22)" filter="url(#drop_${uid})" pointer-events="none">
           <path d="M-6 5 L-9 22 C-9 26 9 26 9 22 L6 5 Z" fill="#F2E4D5"/>
           <path d="M-20 6 C-20 -10 20 -10 20 6 C20 11 -20 11 -20 6 Z" fill="#D93829"/>
           <circle cx="-9" cy="0" r="3.4" fill="#FFF8EE"/>
@@ -444,9 +606,9 @@ export class FloralistGardenHUD {
         </g>
 
         <!-- 3. ARO LARANJA DO RELÓGIO -->
-        <circle cx="215" cy="235" r="132" fill="#B83E04" filter="url(#drop_${uid})"/>
-        <circle cx="215" cy="233" r="130" fill="url(#rim_${uid})"/>
-        <circle cx="215" cy="233" r="122" fill="none" stroke="#FF9C54" stroke-width="2.5" opacity="0.65"/>
+        <circle cx="215" cy="235" r="132" fill="#B83E04" filter="url(#drop_${uid})" pointer-events="none"/>
+        <circle cx="215" cy="233" r="130" fill="url(#rim_${uid})" pointer-events="none"/>
+        <circle cx="215" cy="233" r="122" fill="none" stroke="#FF9C54" stroke-width="2.5" opacity="0.65" pointer-events="none"/>
 
         <!-- 4. FACE DO RELÓGIO (3 OU 4 SESSÕES INTERATIVAS) -->
         <g filter="url(#inner_${uid})">
@@ -545,6 +707,7 @@ export class FloralistGardenHUD {
     const plantedSeed = sheetData?.magiseeds.find((m) => m.fuid === state.plantedFuid) || null;
     const effectiveClockMax = plantedSeed ? plantedSeed.clockSections : state.clockMax;
     const activeStage = plantedSeed ? getActiveStageForClock(plantedSeed, state.clockCurrent) : null;
+    const isAlmostMax = Boolean(plantedSeed) && state.clockCurrent === effectiveClockMax - 1;
 
     let wrapper = document.getElementById("fu-floralist-hud");
     const isNew = !wrapper;
@@ -575,6 +738,12 @@ export class FloralistGardenHUD {
           </select>
         `
         : `<span class="fu-floral-actor-name">${sheetData?.actorName || "Sem Floralista"}</span>`;
+
+    const rootParticlesHtml = `
+      <span class="fu-root-particles" aria-hidden="true">
+        <i></i><i></i><i></i><i></i><i></i><i></i>
+      </span>
+    `;
 
     const bodyContentHtml = !sheetData
       ? `
@@ -629,25 +798,26 @@ export class FloralistGardenHUD {
             <div class="fu-clock-header-row">
               <span class="fu-section-title">Relógio de Germinação</span>
               <div class="fu-clock-variant-switch" role="group" aria-label="Variante do Relógio">
-                <button type="button" class="fu-variant-btn ${effectiveClockMax === 4 ? "is-active" : ""}"
-                        data-clock-max="4" ${!isEditable ? "disabled" : ""}>4 Sessões</button>
                 <button type="button" class="fu-variant-btn ${effectiveClockMax === 3 ? "is-active" : ""}"
                         data-clock-max="3" ${!isEditable ? "disabled" : ""}>3 Sessões</button>
+                <button type="button" class="fu-variant-btn ${effectiveClockMax === 4 ? "is-active" : ""}"
+                        data-clock-max="4" ${!isEditable ? "disabled" : ""}>4 Sessões</button>
               </div>
             </div>
 
             <div class="fu-clock-stage-grid">
               <div class="fu-clock-svg-container">
-                ${this._buildClockSvgHtml(state.clockCurrent, effectiveClockMax, isEditable)}
+                ${this._buildClockSvgHtml(state.clockCurrent, effectiveClockMax, isEditable, isAlmostMax)}
               </div>
 
               <div class="fu-clock-info-panel">
                 ${
                   plantedSeed
                     ? `
-                      <div class="fu-planted-card" data-hint-type="magiseed" data-hint-id="${plantedSeed.fuid}"
+                      <div class="fu-planted-card is-rooted-aura" data-hint-type="magiseed" data-hint-id="${plantedSeed.fuid}"
                            style="--seed-accent: ${plantedSeed.accent || "#4ade80"};"
                            title="Botão direito para ver todos os estágios">
+                        ${rootParticlesHtml}
                         <div class="fu-planted-top">
                           <img src="${plantedSeed.img}" alt="${plantedSeed.name}" />
                           <div class="fu-planted-meta">
@@ -745,6 +915,7 @@ export class FloralistGardenHUD {
                             data-hint-id="${seed.fuid}"
                             ${disabled ? "disabled" : ""}
                             title="Botão direito para ver detalhes de ${seed.name}">
+                      ${isPlanted ? rootParticlesHtml : ""}
                       <img src="${seed.img}" alt="${seed.name}" />
                       <span class="fu-seed-name">${seed.name}</span>
                       <span class="fu-seed-badge">${modeBadge}</span>
@@ -850,7 +1021,7 @@ export class FloralistGardenHUD {
         </svg>
       </div>
 
-      <!-- Topo Ilustrado + Título Floralista (Sem as carinhas) -->
+      <!-- Topo Ilustrado + Título Floralista -->
       <svg class="fu-floral-header-svg" viewBox="0 0 560 310" fill="none" xmlns="http://www.w3.org/2000/svg">
         <defs>
           <radialGradient id="fuPinkPetal" cx="50%" cy="50%" r="55%">
@@ -1105,7 +1276,7 @@ export class FloralistGardenHUD {
       }
     });
 
-    // Clique esquerdo nas Magissementes (Cloromancia ou Enxerto)
+    // Clique esquerdo nas Magissementes (Cloromancia ou Enxerto) com animação em meia-lua
     wrapper.querySelectorAll("[data-seed-fuid]").forEach((btn) => {
       btn.addEventListener("click", async () => {
         if (!isEditable) return;
@@ -1113,14 +1284,16 @@ export class FloralistGardenHUD {
         const targetSeed = sheetData.magiseeds.find((m) => m.fuid === targetFuid);
         if (!targetSeed) return;
 
+        const startRect = btn.getBoundingClientRect();
+
         if (!state.plantedFuid) {
-          await this._plantWithChloromancy(sheetData, state, targetSeed);
+          await this._plantWithChloromancy(sheetData, state, targetSeed, startRect);
         } else if (
           state.plantedFuid !== targetFuid &&
           state.clockCurrent >= 1 &&
           sheetData.skills.graft
         ) {
-          await this._swapWithGraft(sheetData, state, targetSeed);
+          await this._swapWithGraft(sheetData, state, targetSeed, startRect);
         }
       });
     });
@@ -1137,10 +1310,10 @@ export class FloralistGardenHUD {
   /**
    * Planta uma magissemente via Cloromancia (20 PM, Relógio = 0, ajusta automaticamente para 3 ou 4 sessões).
    */
-  async _plantWithChloromancy(sheetData, state, seed) {
+  async _plantWithChloromancy(sheetData, state, seed, startRect = null) {
     const actor = sheetData.actor;
     const mpCost = 20;
-    const targetClockMax = seed.clockSections || 4;
+    const targetClockMax = seed.clockSections || 3;
 
     if (state.deductMp) {
       const currentMp = Number(actor.system?.resources?.mp?.value ?? 0);
@@ -1159,6 +1332,8 @@ export class FloralistGardenHUD {
       clockCurrent: 0,
       clockMax: targetClockMax
     });
+
+    this._animateSeedCrescentFlight(seed, startRect);
 
     const stageZero = getActiveStageForClock(seed, 0);
     const passiveHtml = stageZero
@@ -1220,22 +1395,24 @@ export class FloralistGardenHUD {
   /**
    * Substitui a magissemente atual via Enxerto (0 PM, ajusta o relógio de 3/4 sessões mantendo as seções).
    */
-  async _swapWithGraft(sheetData, state, newSeed) {
+  async _swapWithGraft(sheetData, state, newSeed, startRect = null) {
     const actor = sheetData.actor;
     const oldSeed = sheetData.magiseeds.find((m) => m.fuid === state.plantedFuid);
-    const targetClockMax = newSeed.clockSections || 4;
+    const targetClockMax = newSeed.clockSections || 3;
 
     if (state.clockCurrent >= targetClockMax) {
+      await this._postMagiseedStageToChat(sheetData, newSeed, targetClockMax, targetClockMax, false);
       await this.saveGardenState(actor, {
         plantedFuid: null,
         plantedItemId: null,
         clockCurrent: 0,
         clockMax: targetClockMax
       });
+      this._triggerBloomGrowthAnimation();
       await this._postSeedRemovedChat(
         sheetData,
         newSeed,
-        `<strong>${actor.name}</strong> enxertou <strong>${newSeed.name}</strong> (ciclo de ${targetClockMax} seções) com <strong>${state.clockCurrent}</strong> seções preenchidas, completando imediatamente o ciclo e removendo a magissemente!`
+        `<strong>${actor.name}</strong> enxertou <strong>${newSeed.name}</strong> (ciclo de ${targetClockMax} seções) com <strong>${state.clockCurrent}</strong> seções preenchidas, ativando seu efeito final e removendo a magissemente!`
       );
       return;
     }
@@ -1246,18 +1423,14 @@ export class FloralistGardenHUD {
       clockMax: targetClockMax
     });
 
+    this._animateSeedCrescentFlight(newSeed, startRect);
+
     const activeStage = getActiveStageForClock(newSeed, state.clockCurrent);
     const stageHtml = activeStage
       ? `<hr />${activeStage.buildChatHtml(sheetData.formulas)}`
       : "";
 
-    const treeOfLifeBtn = sheetData.skills.treeOfLife
-      ? `
-        <button type="button" class="fu-chat-action-btn" data-fu-floral-action="tree-of-life" data-actor-id="${actor.id}">
-          🌳 Árvore da Vida: Curar Alvo em Crise (${sheetData.skills.treeOfLife.healAmount} PV)
-        </button>
-      `
-      : "";
+    const treeOfLifeBtn = this._buildTreeOfLifeChatButtonHtml(sheetData);
 
     const content = buildProjectFuChatCard({
       icon: sheetData.skills.graft?.item?.img || newSeed.img,
@@ -1302,11 +1475,23 @@ export class FloralistGardenHUD {
   }
 
   /**
-   * Ao preencher a última seção (4/4 ou 3/3): remove a magissemente e apaga todas as seções.
+   * Ao preencher a última seção (3/3 ou 4/4):
+   * 1. Dispara o Efeito da seção final (ex: 3/3) no chat;
+   * 2. Remove a magissemente, zera o relógio e dispara a animação de plantas crescendo + card da Árvore da Vida.
    */
   async _handleClockCompleted(sheetData, state, effectiveClockMax) {
     const actor = sheetData.actor;
     const seed = sheetData.magiseeds.find((m) => m.fuid === state.plantedFuid);
+
+    if (seed) {
+      await this._postMagiseedStageToChat(
+        sheetData,
+        seed,
+        effectiveClockMax,
+        effectiveClockMax,
+        true
+      );
+    }
 
     await this.saveGardenState(actor, {
       plantedFuid: null,
@@ -1314,11 +1499,13 @@ export class FloralistGardenHUD {
       clockCurrent: 0
     });
 
+    this._triggerBloomGrowthAnimation();
+
     if (seed) {
       await this._postSeedRemovedChat(
         sheetData,
         seed,
-        `O Relógio de Germinação atingiu <strong>${effectiveClockMax}/${effectiveClockMax}</strong> seções! <strong>${seed.name}</strong> encerrou seu ciclo, foi removida do jardim e todas as seções do relógio foram apagadas.`
+        `O Relógio de Germinação atingiu <strong>${effectiveClockMax}/${effectiveClockMax}</strong> seções! Após ativar seu efeito final, <strong>${seed.name}</strong> foi removida do jardim e o relógio voltou a <strong>0/${effectiveClockMax}</strong>.`
       );
     }
   }
@@ -1350,17 +1537,34 @@ export class FloralistGardenHUD {
     });
   }
 
+  /**
+   * Gera o botão estilizado de Árvore da Vida com o ícone real da habilidade da ficha.
+   */
+  _buildTreeOfLifeChatButtonHtml(sheetData) {
+    const tol = sheetData.skills.treeOfLife;
+    if (!tol) return "";
+
+    const iconUrl =
+      tol.item?.img ||
+      "systems/projectfu/styles/static/compendium/classes/floralist/tree-of-life.png";
+
+    return `
+      <button type="button" class="fu-chat-action-btn fu-tree-of-life-chat-btn"
+              data-fu-floral-action="tree-of-life"
+              data-actor-id="${sheetData.actorId}"
+              style="display: flex; align-items: center; gap: 9px; width: 100%; padding: 6px 10px; border-radius: 7px; border: 1.5px solid #2e6f40; background: linear-gradient(180deg, #f2fbf5 0%, #d8f3e2 100%); color: #184226; cursor: pointer; text-align: left; box-shadow: 0 1px 3px rgba(24, 66, 38, 0.16);">
+        <img src="${iconUrl}" width="26" height="26" style="width: 26px; height: 26px; border-radius: 5px; border: 1px solid #2e6f40; object-fit: cover; flex: 0 0 26px;" />
+        <div style="display: flex; flex-direction: column; line-height: 1.2;">
+          <span style="font-weight: 800; font-size: 0.92em;">Árvore da Vida (NP ${tol.level})</span>
+          <span style="font-size: 0.8em; color: #265c37;">Curar aliado em Crise: <strong>+${tol.healAmount} PV</strong></span>
+        </div>
+      </button>
+    `;
+  }
+
   async _postSeedRemovedChat(sheetData, seed, reasonHtml) {
     const actor = sheetData.actor;
-    const tol = sheetData.skills.treeOfLife;
-
-    const treeBtnHtml = tol
-      ? `
-        <button type="button" class="fu-chat-action-btn" data-fu-floral-action="tree-of-life" data-actor-id="${actor.id}">
-          🌳 Árvore da Vida: Curar Alvo em Crise (${tol.healAmount} PV)
-        </button>
-      `
-      : "";
+    const treeBtnHtml = this._buildTreeOfLifeChatButtonHtml(sheetData);
 
     const content = buildProjectFuChatCard({
       icon: seed.img,
