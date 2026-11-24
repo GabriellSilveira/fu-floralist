@@ -30,9 +30,6 @@
   ],
   "socket": true,
   "url": "https://github.com/GabriellSilveira/fu-floralist",
-  "manifest": "https://github.com/GabriellSilveira/fu-floralist/releases/latest/download/module.json",
-  "download": "https://github.com/GabriellSilveira/fu-floralist/releases/latest/download/fu-floralist.zip",
-  "readme": "https://raw.githubusercontent.com/GabriellSilveira/fu-floralist/main/README.md",
-  "bugs": "https://github.com/GabriellSilveira/fu-floralist/issues",
-  "changelog": "https://github.com/GabriellSilveira/fu-floralist/releases"
+  "manifest": "https://raw.githubusercontent.com/GabriellSilveira/fu-floralist/main/module.json",
+  "download": "https://github.com/GabriellSilveira/fu-floralist/archive/refs/heads/main.zip"
 }
