@@ -2,7 +2,7 @@
   "id": "fu-floralist",
   "title": "Fabula Ultima - Floralista (PT-BR)",
   "description": "Interface flutuante ilustrada, relógio de germinação interativo (3 e 4 seções) e automação de magissementes para a classe Floralista no sistema Fabula Ultima (projectfu).",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "compatibility": {
     "minimum": "12",
     "verified": "13"
