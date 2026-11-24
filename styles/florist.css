@@ -8,10 +8,11 @@
 /* Container Flutuante com Aura Neon Verde */
 #fu-floralist-hud.fu-floralist-wrapper {
   position: fixed;
-  top: 120px;
-  left: 115px;
+  display: block;
+  top: 135px;
+  left: 120px;
   width: 460px;
-  z-index: 80;
+  z-index: 150;
   font-family: 'Nunito', var(--font-primary, sans-serif);
   filter: drop-shadow(0 0 14px rgba(74, 222, 128, 0.34));
   transition: opacity 0.24s ease, transform 0.26s ease;
