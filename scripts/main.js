@@ -28,29 +28,69 @@ Hooks.once("ready", () => {
 });
 
 /**
- * Adiciona o botão de acesso rápido na barra lateral esquerda (#scene-controls).
- * Suporta tanto a estrutura Array (Foundry v12) quanto Object/Record (Foundry v13).
+ * Adiciona o botão principal da Floralista na coluna de camadas (#scene-controls),
+ * posicionado logo abaixo do botão de Cartas.
  */
 Hooks.on("getSceneControlButtons", (controls) => {
-  const toolConfig = {
-    name: "fu-floralist",
-    title: "Floralista — Jardim & Relógio de Germinação",
-    icon: "fas fa-seedling",
-    button: true,
-    onClick: () => floralistHud?.toggle(),
-    onChange: () => floralistHud?.toggle()
-  };
-
   if (Array.isArray(controls)) {
-    const tokenControl = controls.find((c) => c.name === "token") || controls[0];
-    if (tokenControl && Array.isArray(tokenControl.tools)) {
-      tokenControl.tools.push(toolConfig);
-    }
+    // Foundry v12
+    controls.push({
+      name: "fu-floralist",
+      title: "Floralista — Jardim & Relógio de Germinação",
+      icon: "fas fa-seedling",
+      layer: "tokens",
+      button: true,
+      visible: true,
+      onClick: () => floralistHud?.toggle(),
+      tools: [],
+      activeTool: ""
+    });
   } else if (controls && typeof controls === "object") {
-    const tokenControl = controls.tokens || controls.token || Object.values(controls)[0];
-    if (tokenControl && tokenControl.tools && typeof tokenControl.tools === "object") {
-      tokenControl.tools["fu-floralist"] = toolConfig;
-    }
+    // Foundry v13
+    controls["fu-floralist"] = {
+      name: "fu-floralist",
+      title: "Floralista — Jardim & Relógio de Germinação",
+      icon: "fas fa-seedling",
+      order: 999,
+      button: true,
+      visible: true,
+      onChange: () => floralistHud?.toggle(),
+      onClick: () => floralistHud?.toggle(),
+      tools: {
+        "fu-floralist-toggle": {
+          name: "fu-floralist-toggle",
+          title: "Abrir / Fechar Jardim",
+          icon: "fas fa-seedling",
+          button: true,
+          visible: true,
+          onChange: () => floralistHud?.toggle(),
+          onClick: () => floralistHud?.toggle()
+        }
+      },
+      activeTool: "fu-floralist-toggle"
+    };
+  }
+});
+
+/**
+ * Garante o disparo do clique no botão da barra lateral no Foundry v12 e v13
+ * sem desativar a camada atual (Tokens).
+ */
+Hooks.on("renderSceneControls", (_app, html) => {
+  const root = html instanceof HTMLElement ? html : html?.[0];
+  if (!root) return;
+
+  const controlBtn = root.querySelector(
+    '[data-control="fu-floralist"], [data-tool="fu-floralist"]'
+  );
+
+  if (controlBtn && !controlBtn.dataset.fuFloralBound) {
+    controlBtn.dataset.fuFloralBound = "true";
+    controlBtn.addEventListener("click", (ev) => {
+      ev.preventDefault();
+      ev.stopPropagation();
+      floralistHud?.toggle();
+    });
   }
 });
 
